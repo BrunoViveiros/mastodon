@@ -1,7 +1,5 @@
 // @ts-check
 
-import { selectUseGroupedNotifications } from 'mastodon/selectors/settings';
-
 import { getLocale } from '../locales';
 import { connectStream } from '../stream';
 
@@ -13,7 +11,7 @@ import {
 } from './announcements';
 import { updateConversations } from './conversations';
 import { processNewNotificationForGroups, refreshStaleNotificationGroups, pollRecentNotifications as pollRecentGroupNotifications } from './notification_groups';
-import { updateNotifications, expandNotifications } from './notifications';
+import { updateNotifications } from './notifications';
 import { updateStatus } from './statuses';
 import {
   updateTimeline,
@@ -105,19 +103,13 @@ export const connectTimelineStream = (timelineId, channelName, params = {}, opti
           const notificationJSON = JSON.parse(data.payload);
           dispatch(updateNotifications(notificationJSON, messages, locale));
           // TODO: remove this once the groups feature replaces the previous one
-          if(selectUseGroupedNotifications(getState())) {
-            dispatch(processNewNotificationForGroups(notificationJSON));
-          }
+          dispatch(processNewNotificationForGroups(notificationJSON));
           break;
         }
-        case 'notifications_merged':
-          const state = getState();
-          if (state.notifications.top || !state.notifications.mounted)
-            dispatch(expandNotifications({ forceLoad: true, maxId: undefined }));
-          if (selectUseGroupedNotifications(state)) {
-            dispatch(refreshStaleNotificationGroups());
-          }
+        case 'notifications_merged': {
+          dispatch(refreshStaleNotificationGroups());
           break;
+        }
         case 'conversation':
           // @ts-expect-error
           dispatch(updateConversations(JSON.parse(data.payload)));
@@ -141,21 +133,15 @@ export const connectTimelineStream = (timelineId, channelName, params = {}, opti
 
 /**
  * @param {Function} dispatch
- * @param {Function} getState
  */
-async function refreshHomeTimelineAndNotification(dispatch, getState) {
+async function refreshHomeTimelineAndNotification(dispatch) {
   await dispatch(expandHomeTimeline({ maxId: undefined }));
 
-  // TODO: remove this once the groups feature replaces the previous one
-  if(selectUseGroupedNotifications(getState())) {
-    // TODO: polling for merged notifications
-    try {
-      await dispatch(pollRecentGroupNotifications());
-    } catch {
-      // TODO
-    }
-  } else {
-    await dispatch(expandNotifications({}));
+  // TODO: polling for merged notifications
+  try {
+    await dispatch(pollRecentGroupNotifications());
+  } catch {
+    // TODO
   }
 
   await dispatch(fetchAnnouncements());

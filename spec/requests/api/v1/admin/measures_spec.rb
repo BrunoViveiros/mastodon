@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin Measures' do
-  let(:user)    { Fabricate(:user, role: UserRole.find_by(name: 'Admin')) }
+  let(:user)    { Fabricate(:admin_user) }
   let(:token)   { Fabricate(:accessible_access_token, resource_owner_id: user.id, scopes: scopes) }
   let(:headers) { { 'Authorization' => "Bearer #{token.token}" } }
   let(:account) { Fabricate(:account) }
@@ -32,6 +32,8 @@ RSpec.describe 'Admin Measures' do
 
         expect(response)
           .to have_http_status(403)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -43,6 +45,8 @@ RSpec.describe 'Admin Measures' do
 
         expect(response)
           .to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         expect(response.parsed_body)
           .to be_an(Array)
