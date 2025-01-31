@@ -28,6 +28,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         app = Doorkeeper::Application.find_by(name: client_name)
 
@@ -40,6 +42,7 @@ RSpec.describe 'Apps' do
             id: app.id.to_s,
             client_id: app.uid,
             client_secret: app.secret,
+            client_secret_expires_at: 0,
             name: client_name,
             website: website,
             scopes: ['read', 'write'],
@@ -59,6 +62,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
         expect(Doorkeeper::Application.find_by(name: client_name)).to be_present
 
         expect(response.parsed_body)
@@ -76,6 +81,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         app = Doorkeeper::Application.find_by(name: client_name)
 
@@ -96,6 +103,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -106,37 +115,45 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
         expect(Doorkeeper::Application.find_by(name: client_name).scopes.to_s).to eq 'read'
       end
     end
 
     context 'with a too-long name' do
-      let(:client_name) { 'hoge' * 20 }
+      let(:client_name) { 'a' * Doorkeeper::Application::APP_NAME_LIMIT * 2 }
 
       it 'returns http unprocessable entity' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
     context 'with a too-long website' do
-      let(:website) { "https://foo.bar/#{'hoge' * 2_000}" }
+      let(:website) { "https://foo.bar/#{'a' * Doorkeeper::Application::APP_WEBSITE_LIMIT * 2}" }
 
       it 'returns http unprocessable entity' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
     context 'with a too-long redirect_uri' do
-      let(:redirect_uris) { "https://app.example/#{'hoge' * 2_000}" }
+      let(:redirect_uris) { "https://app.example/#{'a' * Doorkeeper::Application::APP_REDIRECT_URI_LIMIT * 2}" }
 
       it 'returns http unprocessable entity' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -148,6 +165,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -158,6 +177,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         app = Doorkeeper::Application.find_by(name: client_name)
 
@@ -180,6 +201,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         app = Doorkeeper::Application.find_by(name: client_name)
 
@@ -202,6 +225,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -212,6 +237,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -222,6 +249,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -232,6 +261,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
       end
     end
 
@@ -242,6 +273,8 @@ RSpec.describe 'Apps' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
 
         app = Doorkeeper::Application.find_by(name: client_name)
 
