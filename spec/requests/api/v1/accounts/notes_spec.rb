@@ -22,17 +22,21 @@ RSpec.describe 'Accounts Notes API' do
         subject
 
         expect(response).to have_http_status(200)
+        expect(response.content_type)
+          .to start_with('application/json')
         expect(AccountNote.find_by(account_id: user.account.id, target_account_id: account.id).comment).to eq comment
       end
     end
 
     context 'when account note exceeds allowed length', :aggregate_failures do
-      let(:comment) { 'a' * 2_001 }
+      let(:comment) { 'a' * AccountNote::COMMENT_SIZE_LIMIT * 2 }
 
       it 'does not create account note' do
         subject
 
         expect(response).to have_http_status(422)
+        expect(response.content_type)
+          .to start_with('application/json')
         expect(AccountNote.where(account_id: user.account.id, target_account_id: account.id)).to_not exist
       end
     end
